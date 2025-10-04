@@ -15,6 +15,7 @@
                     <th>Email</th>
                     <th>Senha</th>
                     <th>Data/Hora</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
@@ -23,10 +24,16 @@
                     <td>{{ dado[1] }}</td>
                     <td>{{ dado[2] }}</td>
                     <td>{{ dado[3] }}</td>
+                    <td>
+                        <a href="/delete/{{ dado[0] }}" onclick="return confirm('Apagar esta credencial?')">🗑️</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <div style="margin-top: 20px;">
+            <a href="/logout">Sair do painel</a>
+        </div>
     </div>
 </body>
 </html>
